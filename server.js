@@ -65,6 +65,7 @@ app.get('/',(req,res) => {
 
 app.post('/sendemailfile',(req,res) => {
     upload.array('fileEmp', 2)(req,res,function(err){
+      try{
         if(err){
             console.log(err)
             return res.redirect('http://172.50.3.35/rio-design/views/error.php');
@@ -76,7 +77,7 @@ app.post('/sendemailfile',(req,res) => {
             database: "stock jobs"
           });
           // insert statement
-          let insert = "INSERT INTO data_candidates(first_name, last_name, mail, phone_number, ci, date_birth, address, position, branch) VALUES ('" + req.body.firstname + "', '"+ req.body.lastname + "', '" + req.body.email + "', '" + req.body.tlf + "', '"+ req.body.civ + "', '"+ req.body.dateofbirth + "', '"+ req.body.address + "', '"+ req.body.cargo + "', '"+ req.body.sucursal + "')";
+          let insert = `CALL Add_candidate("${req.body.firstname}", "${req.body.lastname}", "${req.body.email}", "${req.body.tlf}", "${req.body.civ}", "${req.body.dateofbirth}", "${req.body.address}", "${req.body.cargo}", "${req.body.sucursal}")`;
 
           // execute the insert statement
           connection.query(insert);
@@ -125,7 +126,8 @@ app.post('/sendemailfile',(req,res) => {
             ]
           };
               
-          try{ transporter.sendMail(mailOptions, (error, info) =>{
+          try{ 
+            transporter.sendMail(mailOptions, (error, info) =>{
             if (error) {
               console.log(error);
               return res.redirect('http://172.50.3.35/rio-design/views/error.php')
@@ -145,10 +147,16 @@ app.post('/sendemailfile',(req,res) => {
           });
         } catch (error) {
             console.log('error =' + error);
+            return res.redirect('http://172.50.3.35/rio-design/views/error.php')
         }/*                 
         } else { */
         }
-    })
+      } catch (error) {
+        console.log('error =' + error);
+        return res.redirect('http://172.50.3.35/rio-design/views/error.php')
+    }
+  })
+    
 })
 
 var uploadFile = multer({
@@ -162,6 +170,7 @@ app.get('/',(req,res) => {
 
 app.post('/sendemail',(req,res) => {
   uploadFile(req,res,function(err){
+    try{
       if(err){
           console.log(err)
           return res.redirect('http://172.50.3.35/rio-design/views/error.php');
@@ -207,6 +216,10 @@ app.post('/sendemail',(req,res) => {
         });/*                 
       } else { */
       }
+    } catch (error) {
+      console.log('error =' + error);
+      return res.redirect('http://172.50.3.35/rio-design/views/error.php')
+  }
   })
 })
 
