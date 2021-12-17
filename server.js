@@ -1,11 +1,11 @@
 //Chunk 1
-var nodemailer = require('nodemailer');
+let nodemailer = require('nodemailer');
 const express = require('express')
 const bodyParser = require('body-parser');
 const fs = require('fs')
 const multer = require('multer')
 const path = require('path')
-var cors = require('cors');
+let cors = require('cors');
 const app = express()
 const dotenv = require('dotenv');
 dotenv.config({path:'./env/.env'});
@@ -26,27 +26,27 @@ const PORT = process.env.PORT || 3000;
 // 	next();
 // });
 
-var dt = new Date();
+let dt = new Date();
 
-var to = process.env.RECEIVED_MAIL;
-var demail;
-var firstname;
-var lastname;
-var fname;
-var lname;
-var email;
-var cemail;
-var tlf;
-var ctlf;
-var civ;
-var cargo;
-var sucursal;
-var subject;
+let to = process.env.RECEIVED_MAIL;
+let demail;
+let firstname;
+let lastname;
+let fname;
+let lname;
+let email;
+let cemail;
+let tlf;
+let ctlf;
+let civ;
+let cargo;
+let sucursal;
+let subject;
 let id = 0;
 
 //Module Upload File on the server and mail
 
-var Storage = multer.diskStorage({
+let Storage = multer.diskStorage({
     destination: function(req, file, callback) {
         callback(null, "./files");
     },
@@ -63,7 +63,7 @@ var Storage = multer.diskStorage({
 
 //Add files on the storage
 
-var upload = multer({
+let upload = multer({
     storage: Storage
 }); //Field name and max count
 
@@ -84,13 +84,9 @@ app.post('/sendemailfile', async (req,res) => {
             return res.redirect('http://172.50.3.35/rio-design/views/error.php');
         }else{
           // insert statement
-          let compare = `SELECT COUNT(*) FROM data_candidates WHERE (mail = '${req.body.email}' OR ci = ${req.body.civ}) AND id_job_dc = ${req.body.id_cargo}`
           let insert = `CALL sp_AddCandidates("${req.body.firstname}", "${req.body.lastname}", "${req.body.email}", "${req.body.tlf}", "${req.body.civ}", "${req.body.dateofbirth}", "${req.body.address}", "${req.body.id_cargo}", "${req.body.id_sucursal}")`;
 
-        //   connection.query(compare, (error, result) => {
-        //     if(result.length==0){
-        //       console.log(result);
-            connection.query(insert,function(error, results){
+          connection.query(insert,function(error, results){
             try{
                 if(error){
                     throw error;
@@ -100,15 +96,7 @@ app.post('/sendemailfile', async (req,res) => {
             } catch (error) {
                 console.log('error =' + error);
             } 
-            });
-        //     }else{
-        //       return res.redirect('http://172.50.3.35/rio-design/views/success.php')
-        //     }
-        //   });
-          
-          // execute the insert statement
-          
-          //var local by the components for send mail
+          });
           
           firstname = req.body.firstname
           lastname = req.body.lastname
@@ -130,7 +118,7 @@ app.post('/sendemailfile', async (req,res) => {
           
           //function transporter of nodemailer with the services and data accout that sender
 
-          var transporter = nodemailer.createTransport({
+          let transporter = nodemailer.createTransport({
               service: 'gmail',
               auth: {
                 user: process.env.USER_MAIL,
@@ -139,7 +127,7 @@ app.post('/sendemailfile', async (req,res) => {
             });
               
           //function constructor on the body message email
-          var mailOptions = {
+          let mailOptions = {
             from: from,
             to: to,
             subject: subject,
@@ -164,15 +152,6 @@ app.post('/sendemailfile', async (req,res) => {
             } else {
               console.log('Email enviado: ' + info.response);
               return res.redirect('http://172.50.3.35/rio-design/views/success.php')
-              // fs.unlink(pathFile,function(err){
-              //   if(err){
-              //       return res.redirect('http://127.0.0.1/rio-design/views/error.php')
-              //   }else{
-              //       console.log("Eliminado")
-              //       return res.redirect('http://127.0.0.1/rio-design/views/success.php')
-              //   }
-              // })
-              
             }
           });
         } catch (error) {
@@ -189,7 +168,7 @@ app.post('/sendemailfile', async (req,res) => {
     
 })
 
-var uploadFile = multer({
+let uploadFile = multer({
   storage: Storage
 }).single('files');
 
@@ -224,7 +203,7 @@ app.post('/sendemail',(req,res) => {
         console.log(subject)
         console.log(output)
         
-        var transporter = nodemailer.createTransport({
+        let transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
               user: process.env.USER_MAIL,
@@ -232,7 +211,7 @@ app.post('/sendemail',(req,res) => {
             }
           });
             
-        var mailOptions = {
+        let mailOptions = {
           from: from,
           to: demail,
           subject: subject,
@@ -381,6 +360,21 @@ app.get('/api/branchs/:avaibility', (req,res)=>{
   })
 })
 
+
+//Mostrar todas los status//
+app.get('/api/status', (req,res)=>{
+    connection.query('SELECT * FROM stutus', (error,fila)=>{
+        try{
+            if(error){
+                throw error;
+            }else{
+                res.send(fila);
+            }
+        } catch (error) {
+            console.log('error =' + error);
+        }
+    })
+  })
 //Mostrar todas las sucursales donde hay vacantes en espera
 app.get('/api/branchs_office/:post', (req,res)=>{
   connection.query('SELECT branch FROM branch_offices WHERE branch IN (SELECT DISTINCT branch FROM data_candidates)', (error,fila)=>{
@@ -494,7 +488,15 @@ app.post('/api/vacants', (req,res)=>{
   let dt = new Date();
   let publish = "" + dt.getDate().toString().padStart(2, '0') + "/" +(dt.getMonth()+1).toString().padStart(2, '0') + "/" +  dt.getFullYear().toString().padStart(4, '0') + "";
   console.log(publish)
-  let data = {full_name:req.body.full_name, phone_number:req.body.phone_number, mail:req.body.mail,  ci:req.body.ci, position:req.body.position, branch:req.body.branch, post: publish};
+  let data = {
+                full_name:req.body.full_name, 
+                phone_number:req.body.phone_number, 
+                mail:req.body.mail,  
+                ci:req.body.ci, 
+                position:req.body.position, 
+                branch:req.body.branch, 
+                post: publish
+             };
   console.log(data)
   let sql = "INSERT INTO data_candidates SET ?";
   connection.query(sql,data, function(error, results){
@@ -509,6 +511,103 @@ app.post('/api/vacants', (req,res)=>{
       } 
   });
 });
+
+//crear competencia//
+
+app.post('/api/competence', (req,res)=>{
+  let data = {
+                state: req.body.state, 
+                city: req.body.city, 
+                name: req.body.name, 
+                status: req.body.status, 
+                note: req.body.note
+             }
+  let sql = "INSERT INTO data_competence SET ?";
+  connection.query(sql,data, function(error, results){
+      try{
+          if(error){
+              throw error;
+          }else{
+              res.send(results);
+          } 
+      } catch (error) {
+          console.log('error =' + error);
+      } 
+  });
+})
+
+//Mostrar todos los cargos//
+app.get('/api/competence', (req,res)=>{
+    connection.query('SELECT id, state, city, name, status, note, DATE_FORMAT((date), "%d/%m/%Y %H:%i:%S") AS date FROM data_competence', (error,fila)=>{
+        try{
+            if(error){
+                throw error;
+            }else{
+                res.send(fila);
+            }
+        } catch (error) {
+            console.log('error =' + error);
+        } 
+    })
+  })
+
+app.post('/api/product', (req,res)=>{
+let data = {
+                cod_sap: req.body.cod, 
+                id_state: req.body.state, 
+                id_city: req.body.city, 
+                id_department: req.body.dept, 
+                id_group: req.body.group, 
+                price_rio: req.body.prer, 
+                id_comp: req.body.comp, 
+                price_c: req.body.prec, 
+                id_comp2: req.body.comp2, 
+                price_c2: req.body.prec2, 
+                id_comp3: req.body.comp3, 
+                price_c3: req.body.prec3
+            }
+let sql = "INSERT INTO data_product SET ?";
+connection.query(sql,data, function(error, results){
+    try{
+        if(error){
+            throw error;
+        }else{
+            res.send(results);
+        } 
+    } catch (error) {
+        console.log('error =' + error);
+    } 
+});
+})
+
+app.get('/api/product', (req,res)=>{
+    connection.query('SELECT a.id, a.cod_sap, a.detail, s.state, c.city, d.name as department, g.name, a.price_rio, e.name as competence, a.price_c, e2.name as competence2, a.price_c2, e3.name as competence3, a.price_c3, DATE_FORMAT((a.date), "%d/%m/%Y") AS date FROM data_product AS a INNER JOIN states AS s ON a.id_state=s.id INNER JOIN cities AS c ON a.id_city=c.id INNER JOIN department AS d ON a.id_department=d.id INNER JOIN data_group AS g ON a.id_group=g.id INNER JOIN data_competence AS e ON a.id_comp=e.id INNER JOIN data_competence AS e2 ON a.id_comp2=e2.id INNER JOIN data_competence AS e3 ON a.id_comp3=e3.id', (error,fila)=>{
+        try{
+            if(error){
+                throw error;
+            }else{
+                res.send(fila);
+            }
+        } catch (error) {
+            console.log('error =' + error);
+        } 
+    })
+  })
+
+//Mostrar todos los cargos//
+app.get('/api/group', (req,res)=>{
+    connection.query('SELECT * FROM data_group', (error,fila)=>{
+        try{
+            if(error){
+                throw error;
+            }else{
+                res.send(fila);
+            }
+        } catch (error) {
+            console.log('error =' + error);
+        } 
+    })
+})
 
 //crear vacante//
 app.post('/api/jobs', (req,res)=>{
